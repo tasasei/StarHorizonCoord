@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Pragma" content="no-cache">
+<meta charset="utf-8">
+<script type="text/javascript" src="./plotly-latest.min.js" charset="utf-8"></script>
+
+<title>scatter test</title>
+</head>
+
+<body>
+
+  <script language="JavaScript" type="text/javascript" src="./high.js"></script>
+
+ra:<input type="text" name="ra" min="0" max="360" id="ra"><br>
+dec:<input type="text" name="dec" min="0" max="360" id="dec"><br>
+longtitude:<input type="text" name="lng" min="-180" max="180" id="lng"><br>
+latitude:<input type="text" name="lat" min="-90" max="90" id="lat"><br>
+local time:<input type="datetime-local" name="datetime" min="2000-04-01T00:00" max="2100-2-27T00:00" id="datetime" value="2018-08-01T22:00:00+09:00"><br>
+<!-- 2018-08-01T22:00:00+09:00 -->
+<button type=button onclick="plot()">calc</button>
+
+<div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+</body>
+
+<script>
+function MeanSiderealTime(date){ // 1900/3/31~2100/2/28
+    if(date.getUTCMonth() < 2){ // 0(Jan) or 1(Feb)
+    	var Y = date.getUTCFullYear() - 1901;
+	    var M = date.getUTCMonth() + 13; // because of this month's base is zero.
+    }else{
+	    var Y = date.getUTCFullYear() - 1900;
+	    var M = date.getUTCMonth() + 1; // because of this month's base is zero.
+    }
+    
+    var D = date.getUTCDate();   
+    var K = 365*Y + 30*M + D - 33.5 + Math.floor(3*(M+1)/5) + Math.floor(Y/4);
+
+    var tu = K / 36525;
+    console.log()
+    let addSecond = (8640184.542 + 0.0929*tu)*tu + 23925.836;
+    addSecond = (addSecond % 86400);
+    let retDeg = addSecond / 86400 * 360;
+    
+    return retDeg;
+}
+
+function localSiderealTime(date,longtitude){ // date, 経度(-180(W) ~ +180(E))
+    let theta = (MeanSiderealTime(date) - longtitude) % 360;
+    return theta; // deg
+}
+
+
+function horizonCoord(ra, dec, date, lat, lng){ // lat=緯度, lng=経度
+    var st = localSiderealTime(date, lng);
+
+    ra = ra / 360 * (2*Math.PI);
+    dec = dec / 360 * (2*Math.PI);
+    lat = lat / 360 * (2*Math.PI);
+    st = st / 360 * (2*Math.PI);
+
+    var L = Math.cos(dec) * Math.cos(ra); // Math.sin(rad)
+    var M = Math.cos(dec) * Math.sin(ra);
+    var N = Math.sin(dec);
+
+    var l = Math.sin(lat) * Math.cos(st) * L
+	+ Math.sin(lat) * Math.sin(st) * M
+	- Math.cos(lat) * N;
+
+    var m = - Math.sin(st) * L
+	+ Math.cos(st) * M;
+
+    var n = Math.cos(lat) * Math.cos(st) * L
+	+ Math.cos(lat) * Math.sin(st) * M
+	+ Math.sin(lat) * N;
+
+    var A = Math.atan2(-m,l); // 方位角 azimuth radian
+    var h = Math.asin(n); // 高度 h radian
+
+    return {'h':h, 'A':A};
+}
+
+// 式は次を参考にした
+// 天体の位置計算 増補版 (長沢 工) 地人書館
+
+// var d = new Date(1978,5,10,21,20);
+// var x = horizonCoord(316.16639, 38.49975, d, 35.78888888, 35.8);
+// console.log(x);
+
+function plot(){
+
+  var ra = Number(document.getElementById("ra"));
+  var dec = Number(document.getElementById("dec"));
+  var lng = Number(document.getElementById("lng"));
+  var lat = Number(document.getElementById("lat"));
+  var h = [];
+
+  var d = new Date(document.getElementById("datetime"));
+
+
+  var trace1 = {
+    x: [1, 2, 3, 4],
+    y: [10, 15, 13, 17],
+    type: 'scatter'
+  };
+
+  var trace2 = {
+    x: [1, 2, 3, 4],
+    y: [16, 5, 11, 9],
+    type: 'scatter'
+  };
+
+  var data = [trace1, trace2];
+
+  var layout = {
+    yaxis: {range: [0,18]}
+  };
+
+  Plotly.newPlot('myDiv', data, layout);
+}
+</script>
+
+</html>
