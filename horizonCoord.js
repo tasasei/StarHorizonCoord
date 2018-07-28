@@ -76,10 +76,8 @@ function horizonCoord(ra, dec, lat, lng, year, month, date, hours, minutes){ // 
         A = A + 360;
     }
 
+    // -90 ~ 90
     h = h / Math.PI * 180;
-    if( h < 0 ){
-        h = h + 360;
-    }
 
     return {'h':h, 'A':A};
 }

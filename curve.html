@@ -57,7 +57,7 @@ function plot(){
 
   for(let i = -2; i < 5; i++){
     let d = new Date(yearUTC,monthUTC,dateUTC,hoursUTC+i,minutesUTC);
-    hoursArray.push(hoursUTC + minutesUTC/60 + i);
+    hoursArray.push(hoursUTC+timezone + minutesUTC/60 + i); // x axis
     ah = horizonCoord(ra, dec, lat, lng, d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
     h.push(ah.h);
     A.push(ah.A);
@@ -81,7 +81,14 @@ function plot(){
   var data = [trace1];
 
   var layout = {
-    yaxis: {range: [0,90]}
+    title: "Star's altitude.",
+    xaxis: {
+      title: 'time[hour]'
+    },
+    yaxis: {
+      title: 'altitude[deg]',
+      range: [0,90]
+    }
   };
 
   Plotly.newPlot('myDiv', data, layout);
