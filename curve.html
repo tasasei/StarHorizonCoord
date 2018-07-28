@@ -7,116 +7,81 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta charset="utf-8">
 <script type="text/javascript" src="./plotly-latest.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="./horizonCoord.js" charset="utf-8"></script>
+<!-- <script src="./horizonCoord.js" type="module"></script> -->
 
 <title>scatter test</title>
 </head>
 
 <body>
 
-  <script language="JavaScript" type="text/javascript" src="./high.js"></script>
+<form id="param">
+ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.16639"><br>
+dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49975"><br>
+longtitude:<input type="number" name="lng" min="-180" max="180" id="lng" value="139.5"><br>
+latitude:<input type="number" name="lat" min="-90" max="90" id="lat" value="35.788889"><br>
+local time:<input type="datetime-local" name="datetime" min="1900-04-01T00:00" max="2100-2-27T00:00" id="datetime" value="1978-06-10T21:20"><br>
+time zone:<input id="timezone" type="number" min="-12" max="12" value="9">
+<!-- 1978-05-10T21:20:00+09:00 -->
+</form>
 
-ra:<input type="text" name="ra" min="0" max="360" id="ra"><br>
-dec:<input type="text" name="dec" min="0" max="360" id="dec"><br>
-longtitude:<input type="text" name="lng" min="-180" max="180" id="lng"><br>
-latitude:<input type="text" name="lat" min="-90" max="90" id="lat"><br>
-local time:<input type="datetime-local" name="datetime" min="2000-04-01T00:00" max="2100-2-27T00:00" id="datetime" value="2018-08-01T22:00:00+09:00"><br>
-<!-- 2018-08-01T22:00:00+09:00 -->
 <button type=button onclick="plot()">calc</button>
 
 <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
 </body>
 
 <script>
-function MeanSiderealTime(date){ // 1900/3/31~2100/2/28
-    if(date.getUTCMonth() < 2){ // 0(Jan) or 1(Feb)
-    	var Y = date.getUTCFullYear() - 1901;
-	    var M = date.getUTCMonth() + 13; // because of this month's base is zero.
-    }else{
-	    var Y = date.getUTCFullYear() - 1900;
-	    var M = date.getUTCMonth() + 1; // because of this month's base is zero.
-    }
-    
-    var D = date.getUTCDate();   
-    var K = 365*Y + 30*M + D - 33.5 + Math.floor(3*(M+1)/5) + Math.floor(Y/4);
-
-    var tu = K / 36525;
-    console.log()
-    let addSecond = (8640184.542 + 0.0929*tu)*tu + 23925.836;
-    addSecond = (addSecond % 86400);
-    let retDeg = addSecond / 86400 * 360;
-    
-    return retDeg;
-}
-
-function localSiderealTime(date,longtitude){ // date, 経度(-180(W) ~ +180(E))
-    let theta = (MeanSiderealTime(date) - longtitude) % 360;
-    return theta; // deg
-}
-
-
-function horizonCoord(ra, dec, date, lat, lng){ // lat=緯度, lng=経度
-    var st = localSiderealTime(date, lng);
-
-    ra = ra / 360 * (2*Math.PI);
-    dec = dec / 360 * (2*Math.PI);
-    lat = lat / 360 * (2*Math.PI);
-    st = st / 360 * (2*Math.PI);
-
-    var L = Math.cos(dec) * Math.cos(ra); // Math.sin(rad)
-    var M = Math.cos(dec) * Math.sin(ra);
-    var N = Math.sin(dec);
-
-    var l = Math.sin(lat) * Math.cos(st) * L
-	+ Math.sin(lat) * Math.sin(st) * M
-	- Math.cos(lat) * N;
-
-    var m = - Math.sin(st) * L
-	+ Math.cos(st) * M;
-
-    var n = Math.cos(lat) * Math.cos(st) * L
-	+ Math.cos(lat) * Math.sin(st) * M
-	+ Math.sin(lat) * N;
-
-    var A = Math.atan2(-m,l); // 方位角 azimuth radian
-    var h = Math.asin(n); // 高度 h radian
-
-    return {'h':h, 'A':A};
-}
-
-// 式は次を参考にした
-// 天体の位置計算 増補版 (長沢 工) 地人書館
-
-// var d = new Date(1978,5,10,21,20);
-// var x = horizonCoord(316.16639, 38.49975, d, 35.78888888, 35.8);
-// console.log(x);
-
 function plot(){
+  var ra = Number(document.forms.param.ra.value);
+  var dec = Number(document.forms.param.dec.value);
+  var lng = Number(document.forms.param.lng.value);
+  var lat = Number(document.forms.param.lat.value);
 
-  var ra = Number(document.getElementById("ra"));
-  var dec = Number(document.getElementById("dec"));
-  var lng = Number(document.getElementById("lng"));
-  var lat = Number(document.getElementById("lat"));
+  var dt = new Date( Date.parse(document.forms.param.datetime.value) );
+  var timezone = Number(document.forms.param.timezone.value);
+  dt.setHours(dt.getHours() - timezone);
+
+  var yearUTC = dt.getFullYear();
+  var monthUTC = dt.getMonth() + 1; // Jan=0, Feb=1, ...
+  var dateUTC = dt.getDate();
+  var hoursUTC = Number(dt.getHours());
+  var minutesUTC = dt.getMinutes();
   var h = [];
+  var A = [];
+  var hoursArray = [];
+  // alert(horizonCoord(ra, dec, lat, lng, year, month, date, hours, minutes).h);
+  //  alert(horizonCoord(ra, dec, dt, lat ,lng));
+  // alert(dt.getMonth());
+  // alert([ra,dec,lat,lng,year,month,date,hours,minutes]);
+  var ah;
 
-  var d = new Date(document.getElementById("datetime"));
-
+  for(let i = -2; i < 5; i++){
+    let d = new Date(yearUTC,monthUTC,dateUTC,hoursUTC+i,minutesUTC);
+    hoursArray.push(hoursUTC+timezone+i);
+    ah = horizonCoord(ra, dec, lat, lng, d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
+    h.push(ah.h);
+    A.push(ah.A);
+  }
+//   alert(document.forms.param.datetime.value);
 
   var trace1 = {
-    x: [1, 2, 3, 4],
-    y: [10, 15, 13, 17],
+    // x: [1, 2, 3, 4],
+    // y: [10, 15, 13, 17],
+    x: hoursArray,
+    y: h,
     type: 'scatter'
   };
-
+/*
   var trace2 = {
     x: [1, 2, 3, 4],
     y: [16, 5, 11, 9],
     type: 'scatter'
   };
-
-  var data = [trace1, trace2];
+*/
+  var data = [trace1];
 
   var layout = {
-    yaxis: {range: [0,18]}
+    yaxis: {range: [0,90]}
   };
 
   Plotly.newPlot('myDiv', data, layout);
