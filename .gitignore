@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
 curve.html
+plotly-latest.min.js
 old
 sample
 star
