@@ -57,7 +57,7 @@ function plot(){
 
   for(let i = -2; i < 5; i++){
     let d = new Date(yearUTC,monthUTC,dateUTC,hoursUTC+i,minutesUTC);
-    hoursArray.push(hoursUTC+timezone+i);
+    hoursArray.push(hoursUTC + minutesUTC/60 + i);
     ah = horizonCoord(ra, dec, lat, lng, d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
     h.push(ah.h);
     A.push(ah.A);
