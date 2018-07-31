@@ -20,7 +20,11 @@ ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.1663
 dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49975"><br>
 longtitude:<input type="number" name="lng" min="-180" max="180" id="lng" value="139.5"><br>
 latitude:<input type="number" name="lat" min="-90" max="90" id="lat" value="35.788889"><br>
-local time:<input type="datetime-local" name="datetime" min="1900-04-01T00:00" max="2100-2-27T00:00" id="datetime" value="1978-06-10T21:20"><br>
+year:<input type="number" name="year" min="1900" max="2100" id="year" value="1978" step="1">
+month:<input type="number" name="month" min="1" max="12" id="month" value="6" step="1">
+date:<input type="number" name="date" min="1" max="31" id="date" value="10" step="1">
+hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" step="1">
+minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1">
 time zone:<input id="timezone" type="number" min="-12" max="12" value="9">
 <!-- 1978-05-10T21:20:00+09:00 -->
 </form>
@@ -37,15 +41,13 @@ function plot(){
   var lng = Number(document.forms.param.lng.value);
   var lat = Number(document.forms.param.lat.value);
 
-  var dt = new Date( Date.parse(document.forms.param.datetime.value) );
   var timezone = Number(document.forms.param.timezone.value);
-  dt.setHours(dt.getHours() - timezone);
 
-  var yearUTC = dt.getFullYear();
-  var monthUTC = dt.getMonth() + 1; // Jan=0, Feb=1, ...
-  var dateUTC = dt.getDate();
-  var hoursUTC = Number(dt.getHours());
-  var minutesUTC = dt.getMinutes();
+  var yearUTC = Number(document.forms.param.year.value);
+  var monthUTC = Number(document.forms.param.month.value);
+  var dateUTC = Number(document.forms.param.date.value);
+  var hoursUTC = Number(document.forms.param.hours.value) - timezone;
+  var minutesUTC = Number(document.forms.param.minutes.value);
   var h = [];
   var A = [];
   var hoursArray = [];
