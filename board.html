@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Pragma" content="no-cache">
+<meta charset="utf-8">
+<script type="text/javascript" src="./plotly-latest.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="./horizonCoord.js" charset="utf-8"></script>
+<!-- <script src="./horizonCoord.js" type="module"></script> -->
+
+<title>board test</title>
+</head>
+
+<body>
+
+<form id="param">
+ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.16639"><br>
+dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49975"><br>
+longtitude:<input type="number" name="lng" min="-180" max="180" id="lng" value="139.5"><br>
+latitude:<input type="number" name="lat" min="-90" max="90" id="lat" value="35.788889"><br>
+time zone:<input id="timezone" type="number" min="-12" max="12" value="9"><br>
+year:<input type="number" name="year" min="1900" max="2100" id="year" value="2018" step="1">
+month:<input type="number" name="month" min="1" max="12" id="month" value="8" step="1">
+date:<input type="number" name="date" min="1" max="31" id="date" value="10" step="1">
+hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" step="1">
+minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1">
+<!-- 1978-05-10T21:20:00+09:00 -->
+</form>
+
+<button type=button onclick="plot()">calc</button>
+
+<div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+</body>
+
+<script>
+function plot(){
+  const ra = Number(document.forms.param.ra.value);
+  const dec = Number(document.forms.param.dec.value);
+  const lng = Number(document.forms.param.lng.value);
+  const lat = Number(document.forms.param.lat.value);
+
+  const timezone = Number(document.forms.param.timezone.value);
+
+  const yearUTC = Number(document.forms.param.year.value);
+  const monthUTC = Number(document.forms.param.month.value);
+  const dateUTC = Number(document.forms.param.date.value);
+  const hoursUTC = Number(document.forms.param.hours.value) - timezone;
+  const minutesUTC = Number(document.forms.param.minutes.value);
+
+  function GetHorizonCoord(ra_this, dec_this){
+    return horizonCoord(ra_this, dec_this, lat, lng, yearUTC, monthUTC, dateUTC, hoursUTC, minutesUTC);
+  }
+  Plotly.purge("myDiv");
+  Plotly.d3.csv('./star/line.csv', function(err, rows){
+      function unpack(rows, key) {
+          return rows.map(function(row) { return row[key]; });
+      }
+//      let ah_array = rows.map(x => GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg)));
+        let ah_array = rows.map(x => Number(x.id)==72 ? GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg)) : GetHorizonCoord(0,0));
+
+      var trace1 = {
+        r: ah_array.map(x => x.h),
+        theta: ah_array.map(x => x.A),
+        mode: 'markers',
+        name: 'Figure8',
+          line: {color: 'peru'},
+         type: 'scatterpolar'
+      };
+  var data = [trace1];
+
+  var layout = {
+  title: 'Mic Patterns',
+  font: {
+    family: 'Arial, sans-serif;',
+    size: 12,
+    color: '#000'
+  },
+  showlegend: true,
+  orientation: -90,
+  polar:{
+      radialaxis:{
+          range: [90,0]
+      }
+  }
+//  yaxis: {range: [2, 5]}
+  };
+  Plotly.plot('myDiv', data, layout);
+});
+}
+</script>
+
+</html>
