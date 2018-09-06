@@ -54,11 +54,16 @@ function plot(){
   }
   Plotly.purge("myDiv");
   Plotly.d3.csv('./star/line.csv', function(err, rows){
-      function unpack(rows, key) {
-          return rows.map(function(row) { return row[key]; });
+      function MyGetHorizonCoord(x){
+        let x_num = Number(x.id);
+        if(x_num == 85 || x_num == 72){
+          return GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg));
+        }else{
+          return [];
+        }
       }
-//      let ah_array = rows.map(x => GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg)));
-        let ah_array = rows.map(x => Number(x.id)==72 ? GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg)) : GetHorizonCoord(0,0));
+
+      let ah_array = rows.map(MyGetHorizonCoord);
 
       var trace1 = {
         r: ah_array.map(x => x.h),
@@ -71,17 +76,20 @@ function plot(){
   var data = [trace1];
 
   var layout = {
-  title: 'Mic Patterns',
-  font: {
-    family: 'Arial, sans-serif;',
-    size: 12,
-    color: '#000'
-  },
+    title: 'Planisphere',
+    font: {
+      family: 'Arial, sans-serif;',
+      size: 12,
+      color: '#000'
+    },
   showlegend: true,
   orientation: -90,
   polar:{
       radialaxis:{
-          range: [90,0]
+        range: [90,0]
+      },
+      angularaxis:{
+        dtick: 90
       }
   }
 //  yaxis: {range: [2, 5]}
