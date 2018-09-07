@@ -21,11 +21,11 @@ dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49
 longtitude:<input type="number" name="lng" min="-180" max="180" id="lng" value="139.5"><br>
 latitude:<input type="number" name="lat" min="-90" max="90" id="lat" value="35.788889"><br>
 time zone:<input id="timezone" type="number" min="-12" max="12" value="9"><br>
-year:<input type="number" name="year" min="1900" max="2100" id="year" value="2018" step="1">
-month:<input type="number" name="month" min="1" max="12" id="month" value="8" step="1">
-date:<input type="number" name="date" min="1" max="31" id="date" value="10" step="1">
-hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" step="1">
-minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1">
+year:<input type="number" name="year" min="1900" max="2100" id="year" value="2018" step="1" maxlength="4">
+month:<input type="number" name="month" min="1" max="12" id="month" value="8" step="1" maxlength="2">
+date:<input type="number" name="date" min="1" max="31" id="date" value="10" step="1" maxlength="2">
+hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" step="1" maxlength="2">
+minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1" maxlength="2">
 <!-- 1978-05-10T21:20:00+09:00 -->
 </form>
 
@@ -76,7 +76,7 @@ function plot(){
   var data = [trace1];
 
   var layout = {
-    title: 'Planisphere',
+    title: 'PlaniSphere',
     font: {
       family: 'Arial, sans-serif;',
       size: 12,
