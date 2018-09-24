@@ -52,46 +52,64 @@ function plot(){
   function GetHorizonCoord(ra_this, dec_this){
     return horizonCoord(ra_this, dec_this, lat, lng, yearUTC, monthUTC, dateUTC, hoursUTC, minutesUTC);
   }
+
+  function MyConcat(ar){
+    let rt_array = [];
+    for(let i=0; i<ar.length; i++){
+      rt_array = rt_array.concat(ar[i]);
+    }
+    return rt_array;
+  }
+
   Plotly.purge("myDiv");
+
   Plotly.d3.csv('./star/line.csv', function(err, rows){
-      function MyGetHorizonCoord(x){
-        let x_num = Number(x.id);
-        if(x_num == 85 || x_num == 72){
-          return GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg));
-        }else{
-          return [];
-        }
-      }
+  function MyGetHorizonCoord(x){
+    let x_num = Number(x.id);
+    //if(x_num==60){
+    let start = GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg));
+    let end = GetHorizonCoord(Number(x.ra_end_deg),Number(x.dec_end_deg));
+    return [start, end, {h:null,A:null}];
+    //}else{
+    //  return [];
+    //}
+  }
 
-      let ah_array = rows.map(MyGetHorizonCoord);
+  let ah_array = MyConcat( rows.map(MyGetHorizonCoord) );
 
-      var trace1 = {
-        r: ah_array.map(x => x.h),
-        theta: ah_array.map(x => x.A),
-        mode: 'markers',
-        name: 'Figure8',
-          line: {color: 'peru'},
-         type: 'scatterpolar'
-      };
+  var trace1 = {
+    r: ah_array.map(x => x.h),
+    theta: ah_array.map(x => x.A),
+    mode: 'lines+markers',
+    name: 'Figure1',
+    line: {color: 'peru'},
+    type: 'scatterpolar',
+    marker: {
+      size: 4
+    },
+    connectgaps: false
+  };
+
   var data = [trace1];
 
   var layout = {
-    title: 'PlaniSphere',
+    title: 'PlainSphere',
     font: {
       family: 'Arial, sans-serif;',
       size: 12,
       color: '#000'
     },
-  showlegend: true,
-  orientation: -90,
-  polar:{
+    autosize: false,
+    showlegend: true,
+    orientation: -90,
+    polar:{
       radialaxis:{
         range: [90,0]
       },
       angularaxis:{
         dtick: 90
       }
-  }
+    }
 //  yaxis: {range: [2, 5]}
   };
   Plotly.plot('myDiv', data, layout);
