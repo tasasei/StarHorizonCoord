@@ -15,8 +15,8 @@
 <title>board test</title>
 </head>
 
-<!-- body読み込み時にplot -->
-<body onload="plot()">
+<!-- body読み込み時に -->
+<body onload="initFunc()">
 
 <form id="param">
 ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.16639"><br>
@@ -29,7 +29,6 @@ month:<input type="number" name="month" min="1" max="12" id="month" value="8" st
 date:<input type="number" name="date" min="1" max="31" id="date" value="10" step="1">
 hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" step="1">
 minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1">
-<!-- 1978-05-10T21:20:00+09:00 -->
 </form>
 
 <button type=button onclick="plot()">calc</button>
@@ -38,6 +37,19 @@ minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value=
 </body>
 
 <script>
+// ページ読み込み時用の関数
+function initFunc(){
+  // formに現在の時刻を代入
+  var date = new Date();
+  document.getElementById("year").value = date.getFullYear();
+  document.getElementById("month").value = date.getMonth() + 1;
+  document.getElementById("date").value = date.getDate();
+  document.getElementById("hours").value = date.getHours();
+  document.getElementById("minutes").value = date.getMinutes();
+
+  plot();
+}
+
 function plot(){
   const ra = Number(document.forms.param.ra.value);
   const dec = Number(document.forms.param.dec.value);
