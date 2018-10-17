@@ -119,7 +119,7 @@ function plot(){
   var data = [trace1];
 
   var layout = {
-    title: 'PlainSphere',
+    title: 'インタラクティブ星座盤',
     font: {
       family: 'Arial, sans-serif;',
       size: 12,
@@ -135,7 +135,10 @@ function plot(){
         rotation: -90,
         dtick: 90,
         tickvals:['0','90','180','270'],
-        ticktext:['S','W','N','E']
+        ticktext:['S','W','N','E'],
+        tickfont: {
+          size: 20
+        }
       }
     }
 //  yaxis: {range: [2, 5]}
