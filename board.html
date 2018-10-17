@@ -127,12 +127,12 @@ function plot(){
     },
     autosize: false,
     showlegend: true,
-    orientation: -90,
     polar:{
       radialaxis:{
         range: [90,0]
       },
       angularaxis:{
+        rotation: -90,
         dtick: 90,
         tickvals:['0','90','180','270'],
         ticktext:['S','W','N','E']
