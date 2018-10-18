@@ -19,8 +19,8 @@
 <body onload="initFunc()">
 
 <form id="param">
-ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.16639"><br>
-dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49975"><br>
+[マーカー]ra(deg):<input type="number" name="ra" min="0" max="360" id="ra" value="316.16639"><br>
+[マーカー]dec(deg):<input type="number" name="dec" min="0" max="360" id="dec" value="38.49975"><br>
 経度(現在地):<input type="number" name="lng" min="-180" max="180" id="lng" value="139.5"><br>
 緯度(現在地):<input type="number" name="lat" min="-90" max="90" id="lat" value="35.788889"><br>
 time zone:<input id="timezone" type="number" min="-12" max="12" value="9"><br>
@@ -31,7 +31,7 @@ hours:<input type="number" name="hours" min="0" max="24" id="hours" value="21" s
 minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value="20" step="1">
 </form>
 
-<button type=button onclick="plot()">calc</button>
+<button type=button onclick="plot()">plot</button>
 
 <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
 </body>
@@ -39,6 +39,10 @@ minutes:<input type="number" name="minutes" min="0" max="60" id="minutes" value=
 <script>
 // ページ読み込み時用の関数
 function initFunc(){
+  // ra dec の初期値を空に
+  document.getElementById("ra").value = "";
+  document.getElementById("dec").value = "";
+
   // formに現在の時刻を代入
   var date = new Date();
   document.getElementById("year").value = date.getFullYear();
@@ -53,6 +57,13 @@ function initFunc(){
 function plot(){
   const ra = Number(document.forms.param.ra.value);
   const dec = Number(document.forms.param.dec.value);
+
+  // ra と dec が両方入力されていれば、マーカーをプロットする
+  var isPlotMarker = false;
+  if(document.forms.param.ra.value!="" && document.forms.param.dec.value!=""){
+    isPlotMarker = true;
+  }
+
   const lng = Number(document.forms.param.lng.value);
   const lat = Number(document.forms.param.lat.value);
 
@@ -84,24 +95,21 @@ function plot(){
   Plotly.d3.csv('./star/line.csv', function(err, rows){
   function MyGetHorizonCoord(x){
     let x_num = Number(x.id);
-    //if(x_num==60){
     let start = GetHorizonCoord(Number(x.ra_start_deg),Number(x.dec_start_deg));
     start.id = x_num;
     let end = GetHorizonCoord(Number(x.ra_end_deg),Number(x.dec_end_deg));
     end.id = x_num;
     return [start, end, {h:null,A:null,id:x_num}];
-    //}else{
-    //  return [];
-    //}
   }
 
+  let MarkerObject = GetHorizonCoord(ra,dec);
   let ah_array = MyConcat( rows.map(MyGetHorizonCoord) );
 
   var trace1 = {
     r: ah_array.map(x => x.h),
     theta: ah_array.map(x => x.A),
     mode: 'lines+markers',
-    name: 'Figure1',
+    name: 'Stars',
     line: {color: 'peru'},
     type: 'scatterpolar',
     marker: {
@@ -116,7 +124,23 @@ function plot(){
     connectgaps: false
   };
 
-  var data = [trace1];
+  var trace2 = {
+    r: [MarkerObject.h,MarkerObject.h],
+    theta: [MarkerObject.A,MarkerObject.A],
+    mode: 'markers',
+    type: 'scatterpolar',
+    name: 'MARKER',
+    marker: {
+      color: 'red'
+    }
+  };
+
+  var data;
+  if(isPlotMarker){
+    data = [trace1,trace2];
+  }else{
+    data = [trace1];
+  }
 
   var layout = {
     title: 'インタラクティブ星座盤',
