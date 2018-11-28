@@ -14,5 +14,7 @@
 また、[ra]、[dec]を入力し[plot]すると、その座標にに対応する天球上の点がマーカーとして表示されます。
 マーカーにマウスカーソルを重ねると、高度と方位角が表示されます。
 
+![SampleImage2](/image/sample2.png)
+
 ## [天体高度計算ツール](https://tasasei.github.io/StarHorizonCoord/curve.html)
 天体の高度の時間変化をプロットしてくれます。
